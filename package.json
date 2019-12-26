@@ -1,0 +1,22 @@
+{
+  "name": "tea-mug",
+  "version": "1.0.0",
+  "description": "",
+  "main": "tea-mug.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cdxOo/tea-mug.git"
+  },
+  "author": "Jan Schwalbe",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cdxOo/tea-mug/issues"
+  },
+  "homepage": "https://github.com/cdxOo/tea-mug#readme",
+  "dependencies": {
+    "redux": "^4.0.5"
+  }
+}
