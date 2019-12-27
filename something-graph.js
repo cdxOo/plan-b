@@ -1,18 +1,18 @@
 module.exports = [
     {
         name: 'my tea making graph',
-        first: 'prepare tea mug',
+        entry: 'prepare tea mug',
         graph: [
             //[ a, b ,c, d ] ????
             [ 'prepare tea mug', {
-                'subgraph': 'prepare tea mug', // maybe that could be optional as well
+                subgraph: 'prepare tea mug', // maybe that could be optional as well
                 //steps: [ ... ]
                 connect: 'take boiler from stand'
             }],
             [ 'take boiler from stand', 'fill water in boiler' ],
             // short for [ 'take boiler from stand', { connect: 'fill water in boiler' } ],
             [ 'fill water in boiler',  {
-                condition: 'boiler water amount > 0.3 liters',
+                condition: 'boiler water amount >= 0.3 liters',
                 connect: [
                     [ true, 'put boiler on stand' ],
                     [ false, 'fill water in boiler' ]
@@ -20,14 +20,14 @@ module.exports = [
             }],
             [ 'put boiler on stand', 'turn on boiler' ],
             [ 'turn on boiler', {
-                condition: 'water temparature > 100',
+                condition: 'boiler water temperature >= 100',
                 connect: [
                     [ true, 'turn off boiler' ],
                     [ false, 'wait for heated water' ]
                 ]
             }],
             [ 'wait for heated water', {
-                condition: 'water temperature > 100',
+                condition: 'boiler water temperature >= 100',
                 connect: [
                     [ true, 'turn off boiler' ],
                     [ false, 'wait for heated water' ]
@@ -37,7 +37,14 @@ module.exports = [
             [ 'fill mug with water', {
                 subgraph: 'fill mug with water',
                 connect: 'wait til tea is drinkable'
-            }]
+            }],
+            [ 'wait til tea is drinkable', {
+                condition: 'mug water temperature <= 60',
+                connect: [
+                    [ true, '$end'],
+                    [ false, 'wait til tea is drinkable' ]
+                ]
+            }],
         ]
     },
     {
@@ -54,15 +61,17 @@ module.exports = [
     },
     {
         name: 'fill mug with water',
+        entry: 'take boiler from stand',
         graph: [
             [ 'take boiler from stand', 'pour water into mug' ],
             [ 'pour water into mug', {
-                condition: 'mug water amount > 0.2 liters',
+                condition: 'mug water amount >= 0.2 liters',
                 connect: [
                     [ true, 'put boiler on stand' ],
                     [ false, 'pour water into mug' ]
                 ]
             }],
+            [ 'put boiler on stand', '$end' ]
         ]
     }
 ]

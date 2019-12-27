@@ -6,8 +6,8 @@ var reducer = (state, action) => {
     console.log(action.type);
 
     state = state || {
-        boilerWaterTemparature: 0,
-        mugWaterTemparature: 0,
+        boilerWaterTemperature: 0,
+        mugWaterTemperature: 0,
 
         boilerWaterAmount: 0.0,
         mugWaterAmount: 0.0,
@@ -30,13 +30,13 @@ var reducer = (state, action) => {
         case 'wait for heated water':
             state = {
                 ...state,
-                boilerWaterTemparature: state.boilerWaterTemperature + 10,
+                boilerWaterTemperature: state.boilerWaterTemperature + 10,
             }
             break;
         case 'wait till tea is drinkable':
             state = {
                 ...state,
-                mugWaterTemparature: state.mugWaterTemperature - 5,
+                mugWaterTempareture: state.mugWaterTemperature - 5,
             }
             break;
     }
@@ -47,28 +47,33 @@ var reducer = (state, action) => {
 var store = redux.createStore(reducer);
 
 var actioneer = (graph_name, node_name) => {
+    console.log(`NODE ${graph_name}::${node_name}`);
     store.dispatch({ type: node_name });
+    console.log(store.getState());
 }
 
 var conditioneer = (graph_name, condition_name) => {
+    console.log(`CONDITION ${graph_name}::${condition_name}`);
     var state = store.getState();
     
     var conditions = {
-        'boiler water amount > 0.3 liters': () => (
-            store.getState().boilerWaterAmount > 0.3
+        'boiler water amount >= 0.3 liters': () => (
+            state.boilerWaterAmount >= 0.3
         ),
-        'mug water amount > 0.2 liters': () => (
-            store.getState().mugWaterAmount > 0.2
+        'mug water amount >= 0.2 liters': () => (
+            state.mugWaterAmount >= 0.2
         ),
-        'boiler water temparature > 100': () => (
-            store.getState().boilerWaterTemparature > 100
+        'boiler water temperature >= 100': () => (
+            state.boilerWaterTemperature >= 100
         ),
-        'mug water temparature < 60': () => (
-            store.getState().mugWaterTemparatur < 60
+        'mug water temperature <= 60': () => (
+            state.mugWaterTemperature <= 60
         ),
     };
 
-    return conditions[condition_name]()
+    var value = conditions[condition_name]();
+    console.log(`value = ${value}`);
+    return value;
 }
 
 var runner = (
