@@ -53,15 +53,27 @@ var createCustomTranspiler = () => {
 
             if (subgraph.graph) {
                 var keys = Object.keys(subgraph.graph);
-                nodes = (
-                    keys.map(key => {
-                        var definition = subgraph.graph[key];
-                        return dot_syntax.node(subgraph.name + '/' + key, key)
-                    })
-                );
+                nodes = [
+                    dot_syntax.circle(subgraph.name + '/$start'),
+                    dot_syntax.circle(subgraph.name + '/$end'),
 
-                connections = [ ...connections, ...(
-                    keys.map(key => {
+                    ...keys.map(key => {
+                        var definition = subgraph.graph[key];
+                        return (
+                            definition.subgraph
+                            ? dot_syntax.node_for_subgraph(subgraph.name + '/' + key, key)
+                            : dot_syntax.node(subgraph.name + '/' + key, key)
+                        );
+                    })
+                ];
+
+                connections = [
+                    ...connections,
+                    dot_syntax.connection(
+                        subgraph.name + '/$start',
+                        subgraph.name + '/' + subgraph.entry,
+                    ),
+                    ...keys.map(key => {
                         var { condition, connect } = subgraph.graph[key];
 
                         if (condition) {
@@ -94,11 +106,30 @@ var createCustomTranspiler = () => {
                             )
                         }
                     })
-                )];
+                ];
             }
             else if (subgraph.steps) {
+                nodes = [
+                    dot_syntax.circle(subgraph.name + '/$start'),
+                    dot_syntax.circle(subgraph.name + '/$end'),
+
+                    ...subgraph.steps.map(key => {
+                        return (
+                            dot_syntax.node(subgraph.name + '/' + key, key)
+                        );
+                    })
+                ];
+
                 connections = [
                     ...connections,
+                    dot_syntax.connection(
+                        subgraph.name + '/$start',
+                        subgraph.name + '/' + subgraph.steps[0],
+                    ),
+                    dot_syntax.connection(
+                        subgraph.name + '/' + subgraph.steps.slice(-1)[0],
+                        subgraph.name + '/$end',
+                    ),
                     ...subgraph.steps.slice(0, -1).map((step, i) => (
                         dot_syntax.connection(
                             subgraph.name + '/' + step,
@@ -194,12 +225,20 @@ var dot_syntax = {
     diamond: (id, label) => bq`
         "${id}" [ label="${label}" shape=diamond style="" ]
     `,
+    
+    circle: (id) => bq`
+        "${id}" [ label="" shape=circle style="filled" fillcolor="#333333" ]
+    `,
 
     subgraph: (name, inner) => bq`
         subgraph "cluster ${name}" {
             label="${name}"
             ${inner}
         }
+    `,
+
+    node_for_subgraph: (id, label) => bq`
+        "${id}" [ label="${label}" color="blue" fontcolor="blue" fillcolor="#ccffcc"]
     `,
 
     connection: (source, target) => bq`
