@@ -54,44 +54,41 @@ var createCustomTranspiler = () => {
             if (subgraph.graph) {
                 var keys = Object.keys(subgraph.graph);
                 nodes = [
-                    dot_syntax.circle(subgraph.name + '/$start'),
                     dot_syntax.circle(subgraph.name + '/$end'),
 
                     ...keys.map(key => {
                         var definition = subgraph.graph[key];
-                        return (
-                            definition.subgraph
-                            ? dot_syntax.node_for_subgraph(subgraph.name + '/' + key, key)
-                            : dot_syntax.node(subgraph.name + '/' + key, key)
-                        );
+
+                        if (definition.node) {
+                            return (
+                                definition.node === '$start'
+                                ? dot_syntax.circle(subgraph.name + '/$start')
+                                : dot_syntax.node(subgraph.name + '/' + key, key)
+                            );
+                        }
+                        else if (definition.subgraph) {
+                            return dot_syntax.node_for_subgraph(
+                                subgraph.name + '/' + key, key
+                            );
+                        }
+                        else if (definition.condition) {
+                            return dot_syntax.diamond(
+                                subgraph.name + '/' + key, key
+                            );
+                        }
                     })
                 ];
 
                 connections = [
                     ...connections,
-                    dot_syntax.connection(
-                        subgraph.name + '/$start',
-                        subgraph.name + '/' + subgraph.entry,
-                    ),
                     ...keys.map(key => {
                         var { condition, connect } = subgraph.graph[key];
 
                         if (condition) {
-                            nodes.push(
-                                dot_syntax.diamond(
-                                    subgraph.name + '/' + key + ' to ' + condition,
-                                    condition
-                                )
-                            );
-
                             return [
-                                dot_syntax.connection(
-                                    subgraph.name + '/' + key,
-                                    subgraph.name + '/' + key + ' to ' + condition
-                                ),
                                 ...connect.map(([value, target]) => (
                                     dot_syntax.labeled_connection(
-                                        subgraph.name + '/' + key + ' to ' + condition,
+                                        subgraph.name + '/' + key,
                                         subgraph.name + '/' + target,
                                         value.toString()
                                     )
@@ -171,24 +168,57 @@ var createCustomTranspiler = () => {
             prepared.graph = {};
 
             graph_definition.graph.forEach((node_definition) => {
-                var key = node_definition[0],
-                    target = node_definition[1];
-
-                if (typeof target === 'string') {
-                    target = { connect: target };
+                if (Array.isArray(node_definition)) {
+                    node_definition.slice(0, -1).forEach((key, i) => {
+                        if (prepared.graph[key]) {
+                            throw new Error('duplicate node key');
+                        }
+                        prepared.graph[key] = {
+                            node: key,
+                            connect: node_definition[i+1]
+                        }
+                    });
                 }
-                
-                if (prepared.graph[key]) {
-                    throw new Error('duplicate node key');
+                else if (typeof node_definition === 'object') {
+                    var clone = { ...node_definition };
+                        
+                    var key = (
+                        clone.node
+                        || clone.subgraph
+                        || clone.condition
+                    );
+
+                    if (!key) {
+                        throw new Error('definition must include one of "condition", "subgraph", "node"');
+                    }
+
+                    if (prepared.graph[key]) {
+                        throw new Error('duplicate node key');
+                    }
+                    
+                    if (
+                        typeof clone.connect === 'object'
+                        && !Array.isArray(clone.connect)
+                    ) {
+                        clone.connect = (
+                            Object.keys(clone.connect)
+                            .map(val => ([ val, clone.connect[val] ]))
+                        );
+                    }
+
+                    prepared.graph[key] = clone;
                 }
                 else {
-                    prepared.graph[key] = target;
+                    throw new Error('unsupported node definition format');
                 }
+
             })
         }
         else if (graph_definition.steps) {
              prepared.steps = graph_definition.steps; 
         }
+
+        console.error(prepared);
 
         return prepared;
     }

@@ -1,8 +1,8 @@
 module.exports = [
     {
         name: 'my tea making graph',
-        entry: 'prepare tea mug',
         graph: [
+            [ '$start', 'prepare tea mug' ],
             //[ a, b ,c, d ] ????
             {
                 subgraph: 'prepare tea mug', // maybe that could be optional as well
@@ -12,7 +12,6 @@ module.exports = [
             
             [
                 'take boiler from stand',
-                'fill water in boiler',
                 'boiler water amount >= 0.3 liters'
             ],
             // short for [ 'take boiler from stand', { connect: 'fill water in boiler' } ],
@@ -23,6 +22,7 @@ module.exports = [
                     [ false, 'fill water in boiler' ]
                 ]
             },
+            [ 'fill water in boiler', 'boiler water amount >= 0.3 liters' ],
             [
                 'put boiler on stand',
                 'turn on boiler',
@@ -35,17 +35,18 @@ module.exports = [
                     [ false, 'wait for heated water' ]
                 ]
             },
+            [ 'wait for heated water', 'boiler water temperature >= 100'],
             [
                 'turn off boiler',
                 'fill mug with water'
             ],
             {
                 subgraph: 'fill mug with water',
-                connect: 'wait til tea is drinkable'
+                connect: 'mug water temperature <= 60'
             },
             [
                 'wait til tea is drinkable',
-                'mug water temparature <= 60'
+                'mug water temperature <= 60'
             ],
             {
                 condition: 'mug water temperature <= 60',
@@ -74,7 +75,6 @@ module.exports = [
         graph: [
             [
                 'take boiler from stand',
-                'pour water into mug',
                 'mug water amount >= 0.2 liters'
             ],
             {
@@ -84,6 +84,7 @@ module.exports = [
                     [ false, 'pour water into mug' ]
                 ]
             },
+            [ 'pour water into mug', 'mug water amount >= 0.2 liters' ],
             [
                 'put boiler on stand',
                 '$end'
