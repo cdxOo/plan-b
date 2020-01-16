@@ -80,15 +80,14 @@ var createCustomTranspiler = () => {
                             nodes.push(
                                 dot_syntax.diamond(
                                     subgraph.name + '/' + key + ' to ' + condition,
-                                    "" //condition
+                                    condition
                                 )
                             );
 
                             return [
-                                dot_syntax.labeled_connection(
+                                dot_syntax.connection(
                                     subgraph.name + '/' + key,
-                                    subgraph.name + '/' + key + ' to ' + condition,
-                                    condition
+                                    subgraph.name + '/' + key + ' to ' + condition
                                 ),
                                 ...connect.map(([value, target]) => (
                                     dot_syntax.labeled_connection(
@@ -204,8 +203,8 @@ var dot_syntax = {
             ordering=out
             splines=true
             overlap=false
-            nodesep=0.16
-            ranksep=0.18
+            nodesep=0.2
+            ranksep=0.2
             fontname="Helvetica-bold"
             fontsize=9
             style="rounded,bold,filled"
@@ -222,8 +221,11 @@ var dot_syntax = {
         "${id}" [ label="${label}" ]
     `,
 
+    // FIXME: long labels inside of diamonds make it really really large
+    // i dont want that and since graphviz is dead for like 3 years
+    // theres not really a way to style that => falling back to "box"
     diamond: (id, label) => bq`
-        "${id}" [ label="${label}" shape=diamond style="" ]
+        "${id}" [ label="${label}" shape=box style="" ]
     `,
     
     circle: (id) => bq`
