@@ -4,7 +4,7 @@
   "description": "",
   "main": "tea-mug.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx mocha src/*.spec.js"
   },
   "repository": {
     "type": "git",
@@ -18,5 +18,9 @@
   "homepage": "https://github.com/cdxOo/tea-mug#readme",
   "dependencies": {
     "redux": "^4.0.5"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^7.1.1"
   }
 }
