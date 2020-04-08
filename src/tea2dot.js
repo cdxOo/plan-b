@@ -1,4 +1,4 @@
-var bq = require('./block-quote'),
+var bq = require('@cdxoo/block-quote'),
     inspect = require('./inspect');
 
 var createCustomTranspiler = () => {
