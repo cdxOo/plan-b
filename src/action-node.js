@@ -1,3 +1,4 @@
+'use strict';
 var ActionNode = module.exports = (definition) => {
     var node = {
         type: 'action',
@@ -17,9 +18,11 @@ var ActionNode = module.exports = (definition) => {
         };
     }
     else if (typeof definition === 'object') {
+        var { action: name, type: removed, ...rest } = definition;
         node = {
             ...node,
-            ...definition,
+            name,
+            ...rest,
         };
     }
     else {
