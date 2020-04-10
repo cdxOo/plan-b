@@ -14,9 +14,10 @@ describe('ChainNode', () => {
             connect: 'bar'
         };
 
-        var node = ChainNode(definition);
+        var node = ChainNode({ definition });
 
         expect(node).to.eql({
+            path: [],
             type: 'chain',
             name: 'foo',
             actions: [
@@ -34,9 +35,10 @@ describe('ChainNode', () => {
             connect: 'bar'
         };
         
-        var node = ChainNode(definition);
+        var node = ChainNode({ definition });
         
         expect(node).to.eql({
+            path: [],
             type: 'chain',
             name: 'foo',
             connect: 'bar'

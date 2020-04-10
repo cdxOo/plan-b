@@ -1,6 +1,13 @@
 'use strict';
-var ChainNode = module.exports = (definition) => {
+var ChainNode = module.exports = ({
+    path,
+    definition,
+    onCreate
+}) => {
+    path = path || [];
+
     var node = {
+        path,
         type: 'chain'
     };
 
@@ -10,6 +17,8 @@ var ChainNode = module.exports = (definition) => {
         name,
         ...rest
     };
+
+    onCreate && onCreate(node);
 
     return node;
 }

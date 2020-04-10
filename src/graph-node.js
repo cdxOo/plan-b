@@ -1,9 +1,16 @@
 'use strict';
 var toNode = require('./to-node');
 
-var GraphNode = module.exports = (definition) => {
+var GraphNode = module.exports = ({
+    path,
+    definition,
+    onCreate
+}) => {
+    path = path || [];
+
     var node = {
-        type: 'graph'
+        path,
+        type: 'graph',
     };
 
     var {
@@ -24,7 +31,11 @@ var GraphNode = module.exports = (definition) => {
             start = undefined;
 
         subNodeDefinitions.forEach(def => {
-            var n = toNode(def);
+            var n = toNode({
+                path: [ ...path, name ],
+                definition: def,
+                onCreate,
+            });
             if (n.name === '$start') {
                 if (start === undefined) {
                     start = n;
@@ -39,6 +50,8 @@ var GraphNode = module.exports = (definition) => {
         node.start = start;
         node.nodes = subnodes;
     }
+
+    onCreate && onCreate(node);
 
     return node;
 }

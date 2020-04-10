@@ -13,23 +13,27 @@ describe('GraphNode', () => {
             connect: 'bar'
         };
 
-        var node = GraphNode(definition);
+        var node = GraphNode({ definition });
 
         expect(node).to.eql({
+            path: [],
             type: 'graph',
             name: 'foo',
             start: {
+                path: [ 'foo' ],
                 type: 'action',
                 name: '$start',
                 connect: 'do something'
             },
             nodes: [
                 {
+                    path: [ 'foo' ],
                     type: 'action',
                     name: '$start',
                     connect: 'do something'
                 },
                 {
+                    path: [ 'foo' ],
                     type: 'action',
                     name: 'do something',
                     connect: '$end'

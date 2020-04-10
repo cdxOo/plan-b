@@ -12,9 +12,10 @@ describe('ConditionNode', () => {
             ]
         };
 
-        var node = ConditionNode(definition);
+        var node = ConditionNode({ definition });
 
         expect(node).to.eql({
+            path: [],
             type: 'condition',
             name: 'foo',
             connect: [

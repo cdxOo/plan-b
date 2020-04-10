@@ -1,6 +1,13 @@
 'use strict';
-var ActionNode = module.exports = (definition) => {
+var ActionNode = module.exports = ({
+    path,
+    definition,
+    onCreate
+}) => {
+    path = path || [];
+
     var node = {
+        path,
         type: 'action',
     };
 
@@ -28,6 +35,8 @@ var ActionNode = module.exports = (definition) => {
     else {
         throw new Error('node defintion must be an array or an object');
     }
+
+    onCreate && onCreate(node);
 
     return node;
 }

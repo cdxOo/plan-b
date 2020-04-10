@@ -4,24 +4,33 @@ var ActionNode = require('./action-node'),
     ChainNode = require('./chain-node'),
     GraphNode = require('./graph-node');
 
-var toNode = module.exports = (definition) => {
+var toNode = module.exports = ({
+    path,
+    definition,
+    onCreate,
+}) => {
     var node;
 
+    var downstream = {
+        path,
+        definition,
+        onCreate,
+    };
     if (Array.isArray(definition)) {
-        node = ActionNode(definition);
+        node = ActionNode(downstream);
     }
     else if (typeof definition === 'object') {
         if (definition.action) {
-            node = ActionNode(definition)
+            node = ActionNode(downstream)
         }
         else if (definition.condition) {
-            node = ConditionNode(definition);
+            node = ConditionNode(downstream);
         }
         else if (definition.chain) {
-            node = ChainNode(definition);
+            node = ChainNode(downstream);
         }
         else if (definition.graph) {
-            node = GraphNode(definition);
+            node = GraphNode(downstream);
         }
     }
 
