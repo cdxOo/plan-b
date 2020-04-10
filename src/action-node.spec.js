@@ -39,4 +39,21 @@ describe('ActionNode', () => {
         });
     });
 
+    it('calls onCreate() callback when given', () => {
+        var onCreateArgs = undefined;
+
+        var definition = ['foo', 'bar'],
+            onCreate = (...args) => { onCreateArgs = args; },
+            node = ActionNode({ definition, onCreate });
+
+        expect(onCreateArgs).to.eql([
+            {
+                path: [],
+                type: 'action',
+                name: 'foo',
+                connect: 'bar'
+            }
+        ]);
+    });
+
 });

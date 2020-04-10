@@ -43,4 +43,49 @@ describe('GraphNode', () => {
         });
     });
 
+    it('calls onCreate() callback when given', () => {
+        var onCreateArgs = undefined;
+
+        var definition = {
+            graph: 'foo',
+            nodes: [
+                ['$start', 'bar' ],
+                ['bar', '$end' ]
+            ],
+            connect: 'baz'
+        };
+
+        var onCreate = (...args) => { onCreateArgs = args; },
+            node = GraphNode({ definition, onCreate });
+
+        expect(onCreateArgs).to.eql([
+            {
+                path: [],
+                type: 'graph',
+                name: 'foo',
+                start: {
+                    path: [ 'foo' ],
+                    type: 'action',
+                    name: '$start',
+                    connect: 'bar'
+                },
+                nodes: [
+                    {
+                        path: [ 'foo' ],
+                        type: 'action',
+                        name: '$start',
+                        connect: 'bar'
+                    },
+                    {
+                        path: [ 'foo' ],
+                        type: 'action',
+                        name: 'bar',
+                        connect: '$end'
+                    }
+                ],
+                connect: 'baz'
+            }
+        ]);
+    });
+
 });

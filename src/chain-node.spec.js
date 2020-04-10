@@ -45,4 +45,35 @@ describe('ChainNode', () => {
         });
     });
 
+    it('can create when definition is array', () => {
+        var definition = [ 'foo', 'bar', 'baz' ];
+        
+        var node = ChainNode({ definition });
+        
+        expect(node).to.eql({
+            path: [],
+            type: 'chain',
+            name: 'foo',
+            actions: [ 'foo', 'bar' ],
+            connect: 'baz'
+        });
+    });
+
+    it('calls onCreate() callback when given', () => {
+        var onCreateArgs = undefined;
+
+        var definition = { chain: 'foo', connect: 'bar' },
+            onCreate = (...args) => { onCreateArgs = args; },
+            node = ChainNode({ definition, onCreate });
+
+        expect(onCreateArgs).to.eql([
+            {
+                path: [],
+                type: 'chain',
+                name: 'foo',
+                connect: 'bar'
+            }
+        ]);
+    });
+
 });

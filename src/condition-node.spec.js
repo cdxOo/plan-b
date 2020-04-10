@@ -25,4 +25,31 @@ describe('ConditionNode', () => {
         });
     });
 
+    it('calls onCreate() callback when given', () => {
+        var onCreateArgs = undefined;
+
+        var definition = {
+            condition: 'foo',
+            connect: [
+                [ true, 'bar' ],
+                [ false, 'baz' ],
+            ]
+        };
+
+        var onCreate = (...args) => { onCreateArgs = args; },
+            node = ConditionNode({ definition, onCreate });
+
+        expect(onCreateArgs).to.eql([
+            {
+                path: [],
+                type: 'condition',
+                name: 'foo',
+                connect: [
+                    [ true, 'bar' ],
+                    [ false, 'baz' ],
+                ]
+            }
+        ]);
+    });
+
 });

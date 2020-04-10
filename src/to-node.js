@@ -17,7 +17,12 @@ var toNode = module.exports = ({
         onCreate,
     };
     if (Array.isArray(definition)) {
-        node = ActionNode(downstream);
+        if (definition.length > 2) {
+            node = ChainNode(downstream);
+        }
+        else {
+            node = ActionNode(downstream);
+        }
     }
     else if (typeof definition === 'object') {
         if (definition.action) {
