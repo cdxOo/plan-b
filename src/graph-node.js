@@ -1,5 +1,4 @@
 'use strict';
-var toNode = require('./to-node');
 
 var GraphNode = module.exports = ({
     path,
@@ -7,6 +6,9 @@ var GraphNode = module.exports = ({
     onCreate
 }) => {
     path = path || [];
+
+    // FIXME: because cyclical includes
+    var toNode = require('./to-node');
 
     var node = {
         path,

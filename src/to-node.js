@@ -37,6 +37,12 @@ var toNode = module.exports = ({
         else if (definition.graph) {
             node = GraphNode(downstream);
         }
+        else {
+            throw new Error('cannot infer node type');
+        }
+    }
+    else {
+        throw new Error('node definition must be an array or an object')
     }
 
     return node;
