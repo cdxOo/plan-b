@@ -1,28 +1,19 @@
 'use strict';
+var keyBy = require('./get-node-key'),
+    NodeKey = require('./node-key');
 
 var NodeRegistry = module.exports = () => {
     var reg = {},
         nodes = {};
 
-    var keyBy = ({ path, name, connect }, which) => {
-        var prefix = path.join('/');
-        return (
-            which === 'connect'
-            ? `${prefix}/${connect}`
-            : `${prefix}/${name}`
-        );
-    }
-
     reg.add = (node) => {
-        nodes[keyBy(node, 'name')] = node;
+        nodes[NodeKey(node)] = node;
     }
 
-    reg.get = (key) => (
-        nodes[key]
-    )
-
-    reg.nextFor = (node) => (
-        nodes[keyBy(node, 'connect')]
+    reg.get = (path) => (
+        Array.isArray(path)
+        ? nodes[NodeKey(...path)]
+        : nodes[path]
     )
 
     return reg;

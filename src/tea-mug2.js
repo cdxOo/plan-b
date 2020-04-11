@@ -1,6 +1,10 @@
 'use strict';
 var toNode = require('./to-node'),
-    NodeRegistry = require('node-registry');
+    getNodeKey = require('./get-node-key'),
+    NodeRegistry = require('./node-registry');
+
+var NodeKey = (node) => ( getNodeKey(node, 'name') );
+var ConnectKey = (node) => ( getNodeKey(node, 'connect') );
 
 var TeaMug = module.exports = () => {
     var tm = {};
@@ -55,7 +59,7 @@ var TeaMug = module.exports = () => {
             throw new Error('onCondition() is not set, cant figure out which branch to use in case of a condition');
         }
         
-        var current = nodes[`/${recipeName}`];
+        var current = nodes.get(`/${recipeName}`);
         runNode(current);
         while(next = findNextNode(nodes, next))
         runNode({
@@ -76,8 +80,7 @@ var prepareRecipe = ({
         definition: recipe,
         onCreate: (node) => {
             console.log(node);
-            var key = `${node.path.join('/')}/${node.name}`
-            nodes[key] = node;
+            nodes.add(node)
         }
     });
     return node;
@@ -90,24 +93,40 @@ var run = ({
     onCondition
 }) => {
     var next = undefined;
-    if (node.type === 'condition') {
-        next = findNextNode(registry, {
-            path: node.path,
-            connect: getBranchTarget({
-                branches,
-                value: onCondition(node)
-            })
-        });
+
+    if (node.connect === '$end') {
+        var parent = nodes.get(NodeKey(node.path));
+        next = nodes.get(NodeKey(
+            ...parent.path,
+            parent.connect
+        ));
     }
     else {
-        next = findNextNode(registry, node);
+        if (node.type === 'condition') {
+            next = nodes.get(
+                NodeKey(
+                    ...node.path,
+                    getBranchTarget({
+                        branches,
+                        value: onCondition(node)
+                    })
+                )
+            );
+        }
+        else if (node.type === 'graph') {
+            var { path, connect } = node.start;
+            next = nodes.get(NodeKey(
+                ...path,
+                connect
+            ));
+        }
+        else {
+            next = nodes.get(NodeKey(...node.path, connect));
+        }
     }
-    else if (node.type === 'action') {
+
+    if (node.type === 'action') {
         onNode(node)
-        next = node.connect;
-    }
-    else {
-        next = node.connect;
     }
 
     return next;
