@@ -1,4 +1,6 @@
 'use strict';
+var BaseNode = require('./base-node');
+
 var ChainNode = module.exports = ({
     path,
     definition,
@@ -6,33 +8,39 @@ var ChainNode = module.exports = ({
 }) => {
     path = path || [];
 
-    var node = {
-        path,
-        type: 'chain'
-    };
+    var name,
+        connect,
+        other;
 
     if (Array.isArray(definition)) {
         var [ first, ...rest ] = definition,
             last = rest.pop();
 
-        node = {
-            ...node,
-            name: first,
-            actions: [ first, ...rest ],
-            connect: last,
-        };
+        name = first;
+        connect = last;
+        other = { actions: [ first, ...rest ] };
     }
     else if (typeof definition === 'object') {
-        var { chain: name, type: removed, ...rest } = definition;
-        node = {
-            ...node,
-            name,
-            ...rest
-        };
+        ({
+            chain: name,
+            connect,
+            ...other
+        } = definition);
     }
     else {
         throw new Error('node defintion must be an array or an object');
     }
+
+    var node = {
+        ...other,
+        ...BaseNode({
+            type: 'chain',
+            path,
+            name,
+            connect
+        })
+    }
+
     onCreate && onCreate(node);
 
     return node;

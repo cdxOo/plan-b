@@ -25,7 +25,9 @@ describe('ChainNode', () => {
                 'boil water',
                 'brew tea'
             ],
-            connect: 'bar'
+            connect: 'bar',
+            key: '/foo',
+            next: '/bar'
         });
     });
 
@@ -41,7 +43,9 @@ describe('ChainNode', () => {
             path: [],
             type: 'chain',
             name: 'foo',
-            connect: 'bar'
+            connect: 'bar',
+            key: '/foo',
+            next: '/bar'
         });
     });
 
@@ -55,7 +59,9 @@ describe('ChainNode', () => {
             type: 'chain',
             name: 'foo',
             actions: [ 'foo', 'bar' ],
-            connect: 'baz'
+            connect: 'baz',
+            key: '/foo',
+            next: '/baz'
         });
     });
 
@@ -71,7 +77,9 @@ describe('ChainNode', () => {
                 path: [],
                 type: 'chain',
                 name: 'foo',
-                connect: 'bar'
+                connect: 'bar',
+                key: '/foo',
+                next: '/bar',
             }
         ]);
     });
