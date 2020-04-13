@@ -1,4 +1,5 @@
 'use strict';
+var BaseNode = require('./base-node');
 
 var GraphNode = module.exports = ({
     path,
@@ -10,22 +11,21 @@ var GraphNode = module.exports = ({
     // FIXME: because cyclical includes
     var toNode = require('./to-node');
 
-    var node = {
-        path,
-        type: 'graph',
-    };
-
     var {
         graph: name,
-        type: removed,
         nodes: subNodeDefinitions,
-        ...rest
+        connect,
+        ...other
     } = definition;
 
-    node = {
-        ...node,
-        name,
-        ...rest
+    var node = {
+        ...other,
+        ...BaseNode({
+            type: 'graph',
+            path,
+            name,
+            connect,
+        })
     };
 
     if (Array.isArray(subNodeDefinitions)) {

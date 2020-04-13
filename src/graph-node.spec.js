@@ -46,6 +46,8 @@ describe('GraphNode', () => {
                 },
             ],
             connect: 'bar',
+            key: '/foo',
+            next: '/bar'
         });
     });
 
@@ -96,6 +98,8 @@ describe('GraphNode', () => {
                     }
                 ],
                 connect: 'baz',
+                key: '/foo',
+                next: '/baz'
             }
         ]);
     });
