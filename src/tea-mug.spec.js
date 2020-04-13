@@ -1,7 +1,7 @@
 var expect = require('chai').expect,
     TeaMug = require('./tea-mug2');
 
-describe('TeaMug()', () => {
+describe.skip('TeaMug()', () => {
     it('things', () => {
         var barista = (
             TeaMug()

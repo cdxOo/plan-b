@@ -11,19 +11,9 @@ describe('ActionNode', () => {
             path: [],
             type: 'action',
             name: 'foo',
-            connect: 'bar'
-        });
-    });
-
-    it('can create from long array definition', () => {
-        var definition = ['foo', { connect: 'bar' }],
-            node = ActionNode({ definition });
-
-        expect(node).to.eql({
-            path: [],
-            type: 'action',
-            name: 'foo',
-            connect: 'bar'
+            connect: 'bar',
+            key: '/foo',
+            next: '/bar'
         });
     });
 
@@ -35,7 +25,9 @@ describe('ActionNode', () => {
             path: [],
             type: 'action',
             name: 'foo',
-            connect: 'bar'
+            connect: 'bar',
+            key: '/foo',
+            next: '/bar'
         });
     });
 
@@ -51,7 +43,9 @@ describe('ActionNode', () => {
                 path: [],
                 type: 'action',
                 name: 'foo',
-                connect: 'bar'
+                connect: 'bar',
+                key: '/foo',
+                next: '/bar'
             }
         ]);
     });

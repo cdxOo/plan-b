@@ -21,6 +21,11 @@ describe('ConditionNode', () => {
             connect: [
                 [ true, 'bar' ],
                 [ false, 'baz' ],
+            ],
+            key: '/foo',
+            next: [
+                [  true, '/bar'],
+                [  false, '/baz'],
             ]
         });
     });
@@ -47,6 +52,11 @@ describe('ConditionNode', () => {
                 connect: [
                     [ true, 'bar' ],
                     [ false, 'baz' ],
+                ],
+                key: '/foo',
+                next: [
+                    [  true, '/bar'],
+                    [  false, '/baz'],
                 ]
             }
         ]);

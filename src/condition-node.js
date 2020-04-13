@@ -1,4 +1,7 @@
 'use strict';
+var NodeKey = require('./node-key'),
+    BaseNode = require('./base-node');
+
 var ConditionNode = module.exports = ({
     path,
     definition,
@@ -6,16 +9,29 @@ var ConditionNode = module.exports = ({
 }) => {
     path = path || [];
 
-    var node = {
-        path,
-        type: 'condition',
-    };
+    var {
+        condition: name,
+        connect,
+        ...other
+    } = definition;
 
-    var { condition: name, type: removed, ...rest } = definition;
-    node = {
-        ...node,
-        name,
-        ...rest
+    var next = connect.map(
+        ([ value, target ]) => ([
+            value,
+            NodeKey(...path, target)
+        ])
+    );
+
+    var node = {
+        ...other,
+        ...BaseNode({
+            type: 'condition',
+            path,
+            name,
+            connect,
+        }),
+        
+        next
     };
 
     onCreate && onCreate(node);

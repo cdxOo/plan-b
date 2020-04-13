@@ -132,11 +132,6 @@ var run = ({
     return next;
 }
 
-var getNextNode ({
-    nodes,
-    current
-})
-
 var getBranchTarget = ({
     branches,
     value

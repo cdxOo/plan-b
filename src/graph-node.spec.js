@@ -23,20 +23,26 @@ describe('GraphNode', () => {
                 path: [ 'foo' ],
                 type: 'action',
                 name: '$start',
-                connect: 'do something'
+                connect: 'do something',
+                key: '/foo/$start',
+                next: '/foo/do something',
             },
             nodes: [
                 {
                     path: [ 'foo' ],
                     type: 'action',
                     name: '$start',
-                    connect: 'do something'
+                    connect: 'do something',
+                    key: '/foo/$start',
+                    next: '/foo/do something',
                 },
                 {
                     path: [ 'foo' ],
                     type: 'action',
                     name: 'do something',
-                    connect: '$end'
+                    connect: '$end',
+                    key: '/foo/do something',
+                    next: '/foo/$end',
                 },
             ],
             connect: 'bar',
@@ -67,23 +73,29 @@ describe('GraphNode', () => {
                     path: [ 'foo' ],
                     type: 'action',
                     name: '$start',
-                    connect: 'bar'
+                    connect: 'bar',
+                    key: '/foo/$start',
+                    next: '/foo/bar',
                 },
                 nodes: [
                     {
                         path: [ 'foo' ],
                         type: 'action',
                         name: '$start',
-                        connect: 'bar'
+                        connect: 'bar',
+                        key: '/foo/$start',
+                        next: '/foo/bar',
                     },
                     {
                         path: [ 'foo' ],
                         type: 'action',
                         name: 'bar',
-                        connect: '$end'
+                        connect: '$end',
+                        key: '/foo/bar',
+                        next: '/foo/$end',
                     }
                 ],
-                connect: 'baz'
+                connect: 'baz',
             }
         ]);
     });
