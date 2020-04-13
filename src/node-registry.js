@@ -16,5 +16,9 @@ var NodeRegistry = module.exports = () => {
         : nodes[path]
     )
 
+    reg.all = () => (
+        nodes
+    )
+
     return reg;
 }

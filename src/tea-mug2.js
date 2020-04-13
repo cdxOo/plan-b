@@ -1,10 +1,7 @@
 'use strict';
 var toNode = require('./to-node'),
-    getNodeKey = require('./get-node-key'),
+    NodeKey = require('./node-key'),
     NodeRegistry = require('./node-registry');
-
-var NodeKey = (node) => ( getNodeKey(node, 'name') );
-var ConnectKey = (node) => ( getNodeKey(node, 'connect') );
 
 var TeaMug = module.exports = () => {
     var tm = {};
@@ -51,25 +48,44 @@ var TeaMug = module.exports = () => {
             throw new Error(`dont have the "${recipeName}" recipe :(`);
         }
 
-        if (!onNode) {
-            throw new Error('onNode() is not set, dont know what to do :(');
+        if (!onAction) {
+            throw new Error('onAction() is not set, dont know what to do :(');
         }
 
         if (!onCondition) {
             throw new Error('onCondition() is not set, cant figure out which branch to use in case of a condition');
         }
-        
-        var current = nodes.get(`/${recipeName}`);
-        runNode(current);
-        while(next = findNextNode(nodes, next))
-        runNode({
-            registry,
-            onNode,
-            onCondition,
-        });
+
+        runGraph(nodes, `/${recipeName}`, onAction, onCondition);
     }
 
     return tm;
+}
+
+var runGraph = (registry, key, onAction, onCondition) => {
+    var current = registry.get(key);
+    run(current, onAction);
+    while(current = findNextNode(registry, current, onCondition)) {
+        if (current.type === 'graph' && !current.nodes) {
+            runGraph(registry, `/${current.name}`, onAction, onCondition);
+        }
+        else {
+            run(current, onAction);
+        }
+    }
+}
+
+var run = (node, onAction) => {
+    if (node.type === 'action') {
+        onAction(node)
+    }
+    else if (node.type === 'chain') {
+        node.actions.forEach(action => onAction({
+            // FIXME: thats no clean 
+            name: action,
+            key: node.key + '/' + action
+        }))
+    }
 }
 
 var prepareRecipe = ({
@@ -79,54 +95,74 @@ var prepareRecipe = ({
     var node = toNode({
         definition: recipe,
         onCreate: (node) => {
-            console.log(node);
             nodes.add(node)
         }
     });
     return node;
 }
 
-var run = ({
-    registry,
-    node,
-    onNode,
-    onCondition
-}) => {
+var findNextNode = (registry, node, onCondition) => {
     var next = undefined;
+    console.log(node.key);
 
     if (node.connect === '$end') {
-        var parent = nodes.get(NodeKey(node.path));
-        next = nodes.get(NodeKey(
-            ...parent.path,
-            parent.connect
-        ));
+        if (node.path.length > 1) {
+            var parent = registry.get(NodeKey(...node.path));
+            
+            if (!parent) {
+                throw new Error('could not find parent node');
+            }
+
+            if (!(parent.type === 'graph' || parent.type === 'chain')) {
+                throw new Error('parent node must be graph or chain');
+            }
+            
+            next = registry.get(parent.next);
+        }
+        else if (node.path.length === 1) {
+            // this is the end there is no next node
+            next = false;
+        }
+        else {
+            throw new Error('path length should never be < 1');
+        }
     }
     else {
         if (node.type === 'condition') {
-            next = nodes.get(
-                NodeKey(
-                    ...node.path,
-                    getBranchTarget({
-                        branches,
-                        value: onCondition(node)
-                    })
-                )
-            );
+            var name = getBranchTarget({
+                branches: node.connect,
+                value: onCondition(node)
+            })
+            if (name === '$end') {
+                var parent = registry.get(NodeKey(...node.path));
+                if (parent.next) {
+                    next = registry.get(parent.next);
+                }
+                else {
+                    next = false;
+                }
+            }
+            else {
+                next = registry.get(NodeKey(...node.path, name));
+            }
         }
         else if (node.type === 'graph') {
-            var { path, connect } = node.start;
-            next = nodes.get(NodeKey(
-                ...path,
-                connect
-            ));
+            var start = node.start;
+            if (start.type === 'chain') {
+                next = start;
+            }
+            else {
+                next = registry.get(start.next);
+            }
         }
         else {
-            next = nodes.get(NodeKey(...node.path, connect));
+            next = registry.get(node.next);
         }
+    
     }
 
-    if (node.type === 'action') {
-        onNode(node)
+    if (next === undefined) {
+        throw new Error('couldnt find next node');
     }
 
     return next;

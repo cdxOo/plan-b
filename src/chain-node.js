@@ -19,6 +19,11 @@ var ChainNode = module.exports = ({
         name = first;
         connect = last;
         other = { actions: [ first, ...rest ] };
+        
+        // FIXME: thats not really clean i think
+        other.actions = other.actions.filter(
+            action => (action !== '$start')
+        );
     }
     else if (typeof definition === 'object') {
         ({
