@@ -13,7 +13,7 @@ var TeaMug = module.exports = () => {
     var tm = {};
 
     var recipes = [],
-        nodes = NodeRegistry(),
+        registry = NodeRegistry(),
 
         onCondition = undefined,
         onAction = undefined;
@@ -21,7 +21,7 @@ var TeaMug = module.exports = () => {
     tm.recipes = (...args) => {
         args.forEach(definition => {
             var recipe = prepareRecipe({
-                nodes,
+                registry,
                 recipe: definition,
             });
             if (!tm.hasRecipe(recipe.name)) {
@@ -66,7 +66,7 @@ var TeaMug = module.exports = () => {
     }
 
     tm.doNode = (key) => {
-        var node = nodes.get(key);
+        var node = registry.get(key);
 
         if (node.type === 'graph') {
             if (node.nodes) {
@@ -132,12 +132,12 @@ var TeaMug = module.exports = () => {
 
 var prepareRecipe = ({
     recipe,
-    nodes
+    registry
 }) => {
     var node = toNode({
         definition: recipe,
         onCreate: (node) => {
-            nodes.add(node)
+            registry.add(node)
         }
     });
     return node;
