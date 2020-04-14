@@ -58,7 +58,7 @@ describe('TeaMug()', () => {
             TeaMug()
             .recipes(...recipes)
             .onAction((node) => {
-                //console.log(node.key);
+                console.log(node.key);
             })
             .onCondition((node) => {
                 //console.log(node.key);

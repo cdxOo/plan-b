@@ -3,6 +3,12 @@ var toNode = require('./to-node'),
     NodeKey = require('./node-key'),
     NodeRegistry = require('./node-registry');
 
+var OutNode = (path, name) => ({
+    key: NodeKey(...path, name),
+    path,
+    name
+});
+
 var TeaMug = module.exports = () => {
     var tm = {};
 
@@ -56,7 +62,70 @@ var TeaMug = module.exports = () => {
             throw new Error('onCondition() is not set, cant figure out which branch to use in case of a condition');
         }
 
-        runGraph(nodes, `/${recipeName}`, onAction, onCondition);
+        tm.doNode(`/${recipeName}`);
+        //runGraph(nodes, `/${recipeName}`, onAction, onCondition);
+    }
+
+    tm.doNode = (key) => {
+        var node = nodes.get(key);
+
+        if (node.type === 'graph') {
+            if (node.nodes) {
+                tm.doNode(node.start.key);
+            }
+            else {
+                tm.doNode(`/${node.name}`);
+            }
+        }
+        else if (node.type === 'chain') {
+            if (node.actions) {
+                // FIXME: not sure if lifting the scope is good or not
+                node.actions.forEach(action => onAction(
+                    OutNode(node.path, action)
+                ))
+            }
+            else {
+                tm.doNode(`/${node.name}`);
+            }
+        }
+        else if (node.type === 'condition') {
+            // nothing to do here
+            // the magic happens in findNext()
+        }
+        else if (node.type === 'action') {
+            if (node.name !== '$start') {
+                onAction(
+                    OutNode(node.path, node.name)
+                );
+            }
+        }
+
+        var next = tm.findNext(node);
+        if (next) {
+            tm.doNode(next);
+        }
+    }
+
+    tm.findNext = (node) => {
+        if (node.connect === '$end') {
+            return;
+        }
+
+        if (node.type === 'condition') {
+            var target = getBranchTarget({
+                branches: node.connect,
+                value: onCondition(node)
+            });
+            if (target === '$end') {
+                return;
+            }
+            else {
+                return NodeKey(...node.path, target)
+            }
+        }
+        else {
+            return node.next || undefined
+        }
     }
 
     return tm;
@@ -103,7 +172,7 @@ var prepareRecipe = ({
 
 var findNextNode = (registry, node, onCondition) => {
     var next = undefined;
-    console.log(node.key);
+    //console.log(node.key);
 
     if (node.connect === '$end') {
         if (node.path.length > 1) {
@@ -134,25 +203,31 @@ var findNextNode = (registry, node, onCondition) => {
                 value: onCondition(node)
             })
             if (name === '$end') {
-                var parent = registry.get(NodeKey(...node.path));
+                /*var parent = registry.get(NodeKey(...node.path));
                 if (parent.next) {
                     next = registry.get(parent.next);
                 }
-                else {
+                else {*/
                     next = false;
-                }
+                //}
             }
             else {
                 next = registry.get(NodeKey(...node.path, name));
             }
         }
         else if (node.type === 'graph') {
-            var start = node.start;
+            /*var start = node.start;
             if (start.type === 'chain') {
                 next = start;
             }
             else {
                 next = registry.get(start.next);
+            }*/
+            if (node.next) {
+                next = registry.get(node.next);
+            }
+            else {
+                next = false;
             }
         }
         else {
