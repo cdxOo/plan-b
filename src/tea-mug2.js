@@ -69,39 +69,51 @@ var TeaMug = module.exports = () => {
         var node = registry.get(key);
 
         if (node.type === 'graph') {
-            if (node.nodes) {
-                tm.doNode(node.start.key);
-            }
-            else {
-                tm.doNode(`/${node.name}`);
-            }
+            tm.doGraphNode(node);
         }
         else if (node.type === 'chain') {
-            if (node.actions) {
-                // FIXME: not sure if lifting the scope is good or not
-                node.actions.forEach(action => onAction(
-                    OutNode(node.path, action)
-                ))
-            }
-            else {
-                tm.doNode(`/${node.name}`);
-            }
+            tm.doChainNode(node);
         }
         else if (node.type === 'condition') {
             // nothing to do here
             // the magic happens in findNext()
         }
         else if (node.type === 'action') {
-            if (node.name !== '$start') {
-                onAction(
-                    OutNode(node.path, node.name)
-                );
-            }
+            tm.doActionNode(node);
         }
 
         var next = tm.findNext(node);
         if (next) {
             tm.doNode(next);
+        }
+    }
+
+    tm.doGraphNode = (node) => {
+        if (node.nodes) {
+            tm.doNode(node.start.key);
+        }
+        else {
+            tm.doNode(`/${node.name}`);
+        }
+    }
+
+    tm.doChainNode = (node) => {
+        if (node.actions) {
+            // FIXME: not sure if lifting the scope is good or not
+            node.actions.forEach(action => onAction(
+                OutNode(node.path, action)
+            ))
+        }
+        else {
+            tm.doNode(`/${node.name}`);
+        }
+    }
+
+    tm.doActionNode = (node) => {
+        if (node.name !== '$start') {
+            onAction(
+                OutNode(node.path, node.name)
+            );
         }
     }
 
