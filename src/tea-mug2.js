@@ -63,7 +63,6 @@ var TeaMug = module.exports = () => {
         }
 
         tm.doNode(`/${recipeName}`);
-        //runGraph(nodes, `/${recipeName}`, onAction, onCondition);
     }
 
     tm.doNode = (key) => {
@@ -131,32 +130,6 @@ var TeaMug = module.exports = () => {
     return tm;
 }
 
-var runGraph = (registry, key, onAction, onCondition) => {
-    var current = registry.get(key);
-    run(current, onAction);
-    while(current = findNextNode(registry, current, onCondition)) {
-        if (current.type === 'graph' && !current.nodes) {
-            runGraph(registry, `/${current.name}`, onAction, onCondition);
-        }
-        else {
-            run(current, onAction);
-        }
-    }
-}
-
-var run = (node, onAction) => {
-    if (node.type === 'action') {
-        onAction(node)
-    }
-    else if (node.type === 'chain') {
-        node.actions.forEach(action => onAction({
-            // FIXME: thats no clean 
-            name: action,
-            key: node.key + '/' + action
-        }))
-    }
-}
-
 var prepareRecipe = ({
     recipe,
     nodes
@@ -168,79 +141,6 @@ var prepareRecipe = ({
         }
     });
     return node;
-}
-
-var findNextNode = (registry, node, onCondition) => {
-    var next = undefined;
-    //console.log(node.key);
-
-    if (node.connect === '$end') {
-        if (node.path.length > 1) {
-            var parent = registry.get(NodeKey(...node.path));
-            
-            if (!parent) {
-                throw new Error('could not find parent node');
-            }
-
-            if (!(parent.type === 'graph' || parent.type === 'chain')) {
-                throw new Error('parent node must be graph or chain');
-            }
-            
-            next = registry.get(parent.next);
-        }
-        else if (node.path.length === 1) {
-            // this is the end there is no next node
-            next = false;
-        }
-        else {
-            throw new Error('path length should never be < 1');
-        }
-    }
-    else {
-        if (node.type === 'condition') {
-            var name = getBranchTarget({
-                branches: node.connect,
-                value: onCondition(node)
-            })
-            if (name === '$end') {
-                /*var parent = registry.get(NodeKey(...node.path));
-                if (parent.next) {
-                    next = registry.get(parent.next);
-                }
-                else {*/
-                    next = false;
-                //}
-            }
-            else {
-                next = registry.get(NodeKey(...node.path, name));
-            }
-        }
-        else if (node.type === 'graph') {
-            /*var start = node.start;
-            if (start.type === 'chain') {
-                next = start;
-            }
-            else {
-                next = registry.get(start.next);
-            }*/
-            if (node.next) {
-                next = registry.get(node.next);
-            }
-            else {
-                next = false;
-            }
-        }
-        else {
-            next = registry.get(node.next);
-        }
-    
-    }
-
-    if (next === undefined) {
-        throw new Error('couldnt find next node');
-    }
-
-    return next;
 }
 
 var getBranchTarget = ({
