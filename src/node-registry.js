@@ -1,6 +1,5 @@
 'use strict';
-var keyBy = require('./get-node-key'),
-    NodeKey = require('./node-key');
+var NodeKey = require('./node-key');
 
 var NodeRegistry = module.exports = () => {
     var reg = {},
