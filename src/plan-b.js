@@ -12,31 +12,31 @@ var OutNode = (path, name) => ({
 var TeaMug = module.exports = () => {
     var tm = {};
 
-    var recipes = [],
+    var plans = [],
         registry = NodeRegistry(),
 
         onCondition = undefined,
         onAction = undefined;
 
-    tm.recipes = (...args) => {
+    tm.plans = (...args) => {
         args.forEach(definition => {
-            var recipe = prepareRecipe({
+            var plan = preparePlan({
                 registry,
-                recipe: definition,
+                plan: definition,
             });
-            if (!tm.hasRecipe(recipe.name)) {
-                recipes.push(recipe.name);
+            if (!tm.hasPlan(plan.name)) {
+                plans.push(plan.name);
             }
             else {
-                throw new Error(`recipe duplication for "${recipe.name}"`);
+                throw new Error(`plan duplication for "${plan.name}"`);
             }
         });
 
         return tm;
     }
 
-    tm.hasRecipe = (name) => (
-        recipes.indexOf(name) !== -1
+    tm.hasPlan = (name) => (
+        plans.indexOf(name) !== -1
     )
 
     tm.onCondition = (lambda) => {
@@ -49,9 +49,9 @@ var TeaMug = module.exports = () => {
         return tm;
     }
 
-    tm.do = (recipeName) => {
-        if (!tm.hasRecipe(recipeName)) {
-            throw new Error(`dont have the "${recipeName}" recipe :(`);
+    tm.execute = (planName) => {
+        if (!tm.hasPlan(planName)) {
+            throw new Error(`dont have the "${planName}" plan :(`);
         }
 
         if (!onAction) {
@@ -62,7 +62,7 @@ var TeaMug = module.exports = () => {
             throw new Error('onCondition() is not set, cant figure out which branch to use in case of a condition');
         }
 
-        tm.doNode(`/${recipeName}`);
+        tm.doNode(`/${planName}`);
     }
 
     tm.doNode = (key) => {
@@ -142,12 +142,12 @@ var TeaMug = module.exports = () => {
     return tm;
 }
 
-var prepareRecipe = ({
-    recipe,
+var preparePlan = ({
+    plan,
     registry
 }) => {
     var node = toNode({
-        definition: recipe,
+        definition: plan,
         onCreate: (node) => {
             registry.add(node)
         }

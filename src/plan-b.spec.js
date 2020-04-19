@@ -1,7 +1,7 @@
 var expect = require('chai').expect,
-    TeaMug = require('./tea-mug');
+    PlanB = require('./plan-b');
 
-var recipes = [
+var plans = [
     {
         graph: 'make tea',
         nodes: [
@@ -52,13 +52,13 @@ var recipes = [
     },
 ];
 
-describe('TeaMug()', () => {
+describe('PlanB()', () => {
     it('things', () => {
         var water = 0,
             temp = 0;
-        var barista = (
-            TeaMug()
-            .recipes(...recipes)
+        var teamaker = (
+            PlanB()
+            .plans(...plans)
             .onAction((node) => {
                 console.log(node.key);
                 if (node.name === 'more water') {
@@ -79,6 +79,6 @@ describe('TeaMug()', () => {
             })
         );
 
-        barista.do('make tea');
+        teamaker.execute('make tea');
     });
 });
