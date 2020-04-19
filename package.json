@@ -1,21 +1,21 @@
 {
-  "name": "tea-mug",
+  "name": "plan-b",
   "version": "1.0.0",
   "description": "",
-  "main": "tea-mug.js",
+  "main": "plan-b.js",
   "scripts": {
     "test": "npx mocha src/*.spec.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cdxOo/tea-mug.git"
+    "url": "git+https://github.com/cdxOo/plan-b.git"
   },
   "author": "Jan Schwalbe",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cdxOo/tea-mug/issues"
+    "url": "https://github.com/cdxOo/plan-b/issues"
   },
-  "homepage": "https://github.com/cdxOo/tea-mug#readme",
+  "homepage": "https://github.com/cdxOo/plan-b#readme",
   "dependencies": {
     "@cdxoo/block-quote": "^1.0.0",
     "redux": "^4.0.5"
