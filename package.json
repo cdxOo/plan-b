@@ -1,5 +1,5 @@
 {
-  "name": "plan-b",
+  "name": "@cdxoo/plan-b",
   "version": "0.1.0-alpha",
   "description": "",
   "main": "src/plan-b.js",
