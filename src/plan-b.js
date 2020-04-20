@@ -1,22 +1,21 @@
 'use strict';
 var toNode = require('./to-node'),
     NodeKey = require('./node-key'),
-    NodeRegistry = require('./node-registry');
+    NodeRegistry = require('./node-registry'),
+    
+    OutNode = require('./out-node-arg'),
+    SyncExecutor = require('./sync-executor'),
+    AsyncExecutor = require('./async-executor');
 
-var OutNode = (path, name) => ({
-    key: NodeKey(...path, name),
-    path,
-    name
-});
-
-var TeaMug = module.exports = () => {
+var PlanB = module.exports = () => {
     var tm = {};
 
     var plans = [],
         registry = NodeRegistry(),
 
         onCondition = undefined,
-        onAction = undefined;
+        onAction = undefined,
+        isAsync = false;
 
     tm.plans = (...args) => {
         args.forEach(definition => {
@@ -49,6 +48,12 @@ var TeaMug = module.exports = () => {
         return tm;
     }
 
+    tm.async = (flag) => {
+        flag = flag || false;
+        isAsync = flag;
+        return tm;
+    }
+
     tm.execute = (planName) => {
         if (!tm.hasPlan(planName)) {
             throw new Error(`dont have the "${planName}" plan :(`);
@@ -61,81 +66,22 @@ var TeaMug = module.exports = () => {
         if (!onCondition) {
             throw new Error('onCondition() is not set, cant figure out which branch to use in case of a condition');
         }
-
-        tm.doNode(`/${planName}`);
-    }
-
-    tm.doNode = (key) => {
-        var node = registry.get(key);
-
-        if (node.type === 'graph') {
-            tm.doGraphNode(node);
-        }
-        else if (node.type === 'chain') {
-            tm.doChainNode(node);
-        }
-        else if (node.type === 'condition') {
-            // nothing to do here
-            // the magic happens in findNext()
-        }
-        else if (node.type === 'action') {
-            tm.doActionNode(node);
-        }
-
-        var next = tm.findNext(node);
-        if (next) {
-            tm.doNode(next);
-        }
-    }
-
-    tm.doGraphNode = (node) => {
-        if (node.nodes) {
-            tm.doNode(node.start.key);
-        }
-        else {
-            tm.doNode(`/${node.name}`);
-        }
-    }
-
-    tm.doChainNode = (node) => {
-        if (node.actions) {
-            // FIXME: not sure if lifting the scope is good or not
-            node.actions.forEach(action => onAction(
-                OutNode(node.path, action)
-            ))
-        }
-        else {
-            tm.doNode(`/${node.name}`);
-        }
-    }
-
-    tm.doActionNode = (node) => {
-        if (node.name !== '$start') {
-            onAction(
-                OutNode(node.path, node.name)
-            );
-        }
-    }
-
-    tm.findNext = (node) => {
-        if (node.connect === '$end') {
-            return;
-        }
-
-        if (node.type === 'condition') {
-            var target = getBranchTarget({
-                branches: node.connect,
-                value: onCondition(node)
+        
+        if (isAsync) {
+            return AsyncExecutor({
+                registry,
+                key: `/${planName}`,
+                onAction,
+                onCondition
             });
-            if (target === '$end') {
-                return;
-            }
-            else {
-                return NodeKey(...node.path, target)
-            }
         }
         else {
-            return node.next || undefined
+            SyncExecutor({
+                registry,
+                key: `/${planName}`,
+                onAction,
+                onCondition
+            });
         }
     }
 
@@ -155,20 +101,3 @@ var preparePlan = ({
     return node;
 }
 
-var getBranchTarget = ({
-    branches,
-    value
-}) => {
-    var filtered = branches.filter(([ branchValue, target ]) => (
-        value === branchValue
-    ));
-    
-    if (filtered.length < 1) {
-        throw new Error('cannot find any valid target node for condition');
-    }
-    if (filtered.length > 1) {
-        throw new Error('there are multiple possible target nodes for condition')
-    }
-
-    return filtered[0][1];
-}
